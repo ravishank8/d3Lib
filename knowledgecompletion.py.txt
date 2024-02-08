@@ -1,0 +1,57 @@
+# --------------------------------------------------------------
+# Import Modules
+# --------------------------------------------------------------
+
+import os
+import json
+import openai
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+import pandas as pd
+
+# Path to your CSV file
+csv_file_path = 'product_data_copy.csv'
+
+def read_csv_data():
+    return pd.read_csv(csv_file_path)
+
+def create_chatgpt_prompt(question, csv_data):
+    # Your existing logic for creating the prompt
+    context = "answer the question from every information you can get only and recommend and all the products from this csv that can help with the best or top DIY solution available. step by step list would be appreciated and list the product recommendation from the csv last : " + ", ".join([str(row) for row in csv_data.values.flatten()])
+    return context + "\n\nQuestion: " + question
+
+csv_data = read_csv_data()
+chatgpt_prompt = create_chatgpt_prompt("I am a home owner. What equipments do I need to install garage storage cabinets?.", csv_data)
+
+# --------------------------------------------------------------
+# Load OpenAI API Token From the .env File
+# --------------------------------------------------------------
+
+load_dotenv()
+
+import os
+os.environ['OPENAI_API_KEY'] = '<API KEY>'
+
+from openai import OpenAI
+OpenAI.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI()
+
+
+# --------------------------------------------------------------
+# Ask ChatGPT a Question
+# --------------------------------------------------------------
+
+completion = client.chat.completions.create(
+    #model="gpt-3.5-turbo-0613",
+    model="gpt-4-1106-preview",
+    messages=[
+        {
+            "role": "user",
+            "content": chatgpt_prompt
+        },
+    ],
+)
+
+output = completion.choices[0].message.content
+print(output)

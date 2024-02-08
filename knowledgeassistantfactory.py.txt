@@ -1,0 +1,21 @@
+import os
+os.environ['OPENAI_API_KEY'] = '<API KEY>'
+
+from openai import OpenAI
+OpenAI.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI()
+
+# Step 1: Create an Assistant
+
+# Upload a file with an "assistants" purpose
+file = client.files.create(
+  file=open("product_data.json", "rb"),
+  purpose='assistants'
+)
+
+assistant = client.beta.assistants.create(
+  instructions="Answer the questions from every information you can get and then recommend similar products from your product_data.json (along with their sku_ids) that can help accomplish the ask.",
+  model="gpt-4-1106-preview",
+  tools=[{"type": "retrieval"}],
+  file_ids=[file.id]
+)
